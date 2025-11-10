@@ -216,8 +216,6 @@ class TestProductRoutes(TestCase):
         response = self.client.put(url, json=payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)        
 
-    # Write a test case to Delete a Product and watch it fail
-    # Write the code to make the Delete test case pass
     def test_delete_product(self):
         """ Should delete a product """
         test_product = self._create_products()[0]
@@ -234,14 +232,13 @@ class TestProductRoutes(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # Write a test case to List all Products and watch it fail
-    # Write the code to make the List all test case pass
     def test_list_all_products(self):
+        """ Should get all products """
         products = self._create_products(10)
 
         url = f"{BASE_URL}"
         response = self.client.get(url)
-        selfassertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json
         self.assertIsInstance(data, list)
@@ -250,18 +247,52 @@ class TestProductRoutes(TestCase):
     # Write a test case to List by name a Product and watch it fail
     # Write the code to make the List by name test case pass
     def test_list_products_by_name(self):
-        raise NotImplementedError
+        """ Should search by product name """
+        products = self._create_products(10)
+        search_name = products[0].name
+        name_count = sum([p.name == search_name for p in products])
 
-    # Write a test case to List by category a Product and watch it fail
-    # Write the code to make the List by category test case pass
+        url = f"{BASE_URL}?name={search_name}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), name_count)
+
     def test_list_products_by_category(self):
-        raise NotImplementedError
+        """ Should search by product category """
+        products = self._create_products(10)
+        search_category = products[0].category.name
+        category_count = sum([p.category.name == search_category for p in products])
 
-    # Write a test case to List by availability a Product and watch it fail
-    # Write the code to make the List by availability test case pass
+        url = f"{BASE_URL}?category={search_category}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), category_count)
+
+    def test_list_products_by_invalid_category(self):
+        """ Should return bad request when searching by invalid category """
+        url = f"{BASE_URL}?category={'BAD_CATEGORY'}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_list_products_by_availability(self):
-        raise NotImplementedError
+        """ Should search by product availability """
+        products = self._create_products(10)
+        search_available = products[0].available
+        available_count = sum([p.available == search_available for p in products])
 
+        url = f"{BASE_URL}?available={search_available}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), available_count)
 
     ######################################################################
     # Utility functions

@@ -20,7 +20,7 @@ Product Store Service with UI
 """
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
-from service.models import Product
+from service.models import Product, Category
 from service.common import status  # HTTP Status Codes
 from . import app
 
@@ -86,7 +86,7 @@ def create_products():
 
     message = product.serialize()
 
-    location_url = url_for("get_products", id=product.id, _external=True)
+    location_url = url_for("get_product", id=product.id, _external=True)
     
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
@@ -98,9 +98,44 @@ def create_products():
 @app.route("/products", methods=['GET'])
 def get_products():
     """
-    Gets all products
+    Gets products, filtered by query parametes if provided
     """
+    name = request.args.get("name")                 # Check for ?name=
+    category_str = request.args.get("category")     # Check for ?category=
+    available_str = request.args.get("available")     # Check for ?available=
+
+    # Start with all products:
     products = Product.all()
+
+    if name:
+        # Filter by Name:
+        products = [p for p in products if p.name == name]
+    
+    if category_str:
+        try:
+            # Filter by Category:
+            category = getattr(Category, category_str.upper())
+            products = [p for p in products if p.category == category]
+        except AttributeError as error:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Invalid category: {category_str}"
+            )
+
+    if available_str:
+        # Filter by Available:
+        available = None
+        if available_str.lower() in ('true', 't', '1', 'yes'):
+            available = True
+        elif available_str.lower() in ('false', 'f', '0', 'no'):
+            available = False
+        else:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Invalid value for 'available': {available_str}"
+            )
+        products = [p for p in products if p.available == available]
+
     product_list = [p.serialize() for p in products]
     return jsonify(product_list), status.HTTP_200_OK
 
@@ -109,7 +144,7 @@ def get_products():
 ######################################################################
 
 @app.route("/products/<int:id>", methods=['GET'])
-def get_products(id):
+def get_product(id):
     """
     Gets a Product by ID
     This endpoint will get a Product based on the ID provided in the URL
@@ -131,7 +166,7 @@ def get_products(id):
 ######################################################################
 
 @app.route("/products/<int:id>", methods=['PUT'])
-def update_products(id):
+def update_product(id):
     """
     Updates a product with specified id
     This endpoint will update the specified product with newly provided values
@@ -178,7 +213,7 @@ def update_products(id):
 ######################################################################
 
 @app.route("/products/<int:id>", methods=['DELETE'])
-def delete_products(id):
+def delete_product(id):
     """
     Deletes a product with specified id
     This endpoint will delete the specified product
