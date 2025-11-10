@@ -123,16 +123,20 @@ class TestProductModel(unittest.TestCase):
         app.logger.debug(f"Creating product: {product.__repr__()}")
         product.id = None
         product.create()
+        app.logger.debug(f"Created product: {product.__repr__()}")
         self.assertIsNotNone(product.id)
         products = Product.all()
         self.assertEqual(len(products), 1)
 
-        product.description = "Muh updated description!"
+        new_desc = "A very desirable product that you want, yes, $$$$."
+        product.description = new_desc
         product.update()
 
         products = Product.all()
+        self.assertEqual(len(products), 1)
         updated_product = products[0]
-        self.assertEqual(updated_product.description, "Muh updated description!")
+        self.assertEqual(updated_product.id, product.id)
+        self.assertEqual(updated_product.description, new_desc)
 
 
     def test_delete_product(self):
@@ -141,7 +145,6 @@ class TestProductModel(unittest.TestCase):
         app.logger.debug(f"Creating product: {product.__repr__()}")
         product.id = None
         product.create()
-        self.assertIsNotNone(product.id)
         products = Product.all()
         self.assertEqual(len(products), 1)
         product.delete()
@@ -150,63 +153,64 @@ class TestProductModel(unittest.TestCase):
 
     def test_list_all_products(self):
         """It should list all products in the database"""
-        product_1 = ProductFactory()
-        product_1.id = None
-        product_1.create()
+        products = Product.all()
+        self.assertEqual(len(products), 0)
 
-        product_2 = ProductFactory()
-        product_2.id = None
-        product_2.create()
-
-        product_2 = ProductFactory()
-        product_2.id = None
-        product_2.create()
+        for i in range(5):
+            p = ProductFactory()
+            p.id = None
+            p.create()        
 
         products = Product.all()
-        self.assertEqual(len(products), 3)
+        self.assertEqual(len(products), 5)
 
     def test_search_for_product_by_name(self):
         """It should search for a product by name"""
-        product_1 = ProductFactory()
-        product_1.id = None
-        product_1.create()
+        for i in range(5):
+            p = ProductFactory()
+            p.id = None
+            p.create()
 
-        product_2 = ProductFactory()
-        product_2.id = None
-        product_2.create()
+        products = Product.all()
+        self.assertEqual(len(products), 5)
+        want_name = products[0].name
+        exist_count = sum([p.name == want_name for p in products])
+        found_products = Product.find_by_name(want_name)
+        self.assertEqual(len(found_products), exist_count)
+        is_all_matched = all(p.name == want_name for p in found_products)
+        self.assertTrue(is_all_matched)
 
-        found_products = Product.find_by_name(product_2.name)
-        # Should only be one item:     
-        self.assertEqual(found_products[0].id, product_2.id)
 
     def test_search_for_product_by_category(self):
         """It should search for a product by category"""
-        product_1 = ProductFactory()
-        product_1.id = None
-        product_1.category = Category.FOOD
-        product_1.create()
+        for i in range(10):
+            p = ProductFactory()
+            p.id = None
+            p.create()
 
-        product_2 = ProductFactory()
-        product_2.id = None
-        product_2.category = Category.HOUSEWARES
-        product_2.create()
+        products = Product.all()
+        self.assertEqual(len(products), 10)
+        category = products[0].category
 
-        found_products = Product.find_by_category(Category.FOOD)
-        # Should only be one item:     
-        self.assertEqual(found_products[0].name, product_1.name)
+        category_count = sum([p.category == category for p in products])
+        cat_test_products = Product.find_by_category(category)
+        self.assertEqual(len(cat_test_products), category_count)
+        is_all_matched = all(p.category == category for p in cat_test_products)
+        self.assertTrue(is_all_matched)
 
     def test_search_for_product_by_availability(self):
         """It should search for a product by availability"""
-        product_1 = ProductFactory()
-        product_1.id = None
-        product_1.available = False
-        product_1.create()
+        for i in range(10):
+            p = ProductFactory()
+            p.id = None
+            p.create()
 
-        product_2 = ProductFactory()
-        product_2.id = None
-        product_2.available = True
-        product_2.create()
+        products = Product.all()
+        self.assertEqual(len(products), 10)
+        availability = products[0].available
 
-        found_products = Product.find_by_availability(True)
-        # Should only be one item:
-        self.assertEqual(found_products[0].name, product_2.name)
+        available_count = sum([p.available == availability for p in products])        
+        avail_test_products = Product.find_by_availability(availability)
+        self.assertEqual(len(avail_test_products), available_count)
+        is_all_matched = all(p.available == availability for p in avail_test_products)
+        self.assertTrue(is_all_matched)
