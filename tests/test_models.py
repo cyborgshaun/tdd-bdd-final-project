@@ -214,3 +214,20 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(len(avail_test_products), available_count)
         is_all_matched = all(p.available == availability for p in avail_test_products)
         self.assertTrue(is_all_matched)
+
+    def test_search_for_product_by_price(self):
+        """It should search for a product by price"""
+        for i in range(10):
+            p = ProductFactory()
+            p.id = None
+            p.create()
+
+        products = Product.all()
+        self.assertEqual(len(products), 10)
+        price = products[0].price
+
+        price_count = sum([p.price == price for p in products])
+        price_test_products = Product.find_by_price(price)
+        self.assertEqual(len(price_test_products), price_count)
+        is_all_matched = all(p.price == price for p in price_test_products)
+        self.assertTrue(is_all_matched)
