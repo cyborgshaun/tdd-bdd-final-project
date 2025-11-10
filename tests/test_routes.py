@@ -30,7 +30,7 @@ from decimal import Decimal
 from unittest import TestCase
 from service import app
 from service.common import status
-from service.models import db, init_db, Product
+from service.models import db, init_db, Product, Category
 from tests.factories import ProductFactory
 
 # Disable all but critical errors during normal test run
@@ -130,19 +130,15 @@ class TestProductRoutes(TestCase):
         self.assertEqual(new_product["available"], test_product.available)
         self.assertEqual(new_product["category"], test_product.category.name)
 
-        #
-        # Uncomment this code once READ is implemented
-        #
-
-        # # Check that the location header was correct
-        # response = self.client.get(location)
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # new_product = response.get_json()
-        # self.assertEqual(new_product["name"], test_product.name)
-        # self.assertEqual(new_product["description"], test_product.description)
-        # self.assertEqual(Decimal(new_product["price"]), test_product.price)
-        # self.assertEqual(new_product["available"], test_product.available)
-        # self.assertEqual(new_product["category"], test_product.category.name)
+        # Check that the location header was correct
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_product = response.get_json()
+        self.assertEqual(new_product["name"], test_product.name)
+        self.assertEqual(new_product["description"], test_product.description)
+        self.assertEqual(Decimal(new_product["price"]), test_product.price)
+        self.assertEqual(new_product["available"], test_product.available)
+        self.assertEqual(new_product["category"], test_product.category.name)
 
     def test_create_product_with_no_name(self):
         """It should not Create a Product without a name"""
@@ -163,9 +159,102 @@ class TestProductRoutes(TestCase):
         response = self.client.post(BASE_URL, data={}, content_type="plain/text")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
+    def test_get_product(self):
+        """ Should get a product """
+        test_product = self._create_products()[0]
+
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json, test_product.serialize())
+
+    def test_get_product_not_found(self):
+        """ Should return not found for unknown product """
+        url = f"{BASE_URL}/{5000}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # Write a test case to Update a Product and watch it fail
+    # Write the code to make the Update test case pass
+    def test_update_product(self):
+        """ Should update a product """
+        test_product = self._create_products()[0]
+        test_product.name = "BrandSpankingNewProduct"
+        test_product.description = "It's a never before seen product that's gonna knock yer socks off!"
+        test_product.price = 111.11
+        test_product.available = True
+        test_product.category = Category.TOOLS
+
+        payload = test_product.serialize()
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.put(url, json=payload)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(payload, response.json)
+
+    def test_update_product_no_data(self):
+        """ Should return bad request when missing all data """
+        test_product = self._create_products()[0]
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.put(url, json={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_product_extra_attribute(self):
+        """ Should return bad request when it has an invalid category """
+        test_product = self._create_products()[0]
+        payload = test_product.serialize()
+        payload["category"] = 1000
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.put(url, json=payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_product_missing_key(self):
+        """ Should return bad request when it is missing a key """
+        test_product = self._create_products()[0]
+        payload = test_product.serialize()
+        del payload["name"]
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.put(url, json=payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)        
+
+    # Write a test case to Delete a Product and watch it fail
+    # Write the code to make the Delete test case pass
+    def test_delete_product(self):
+        """ Should delete a product """
+        test_product = self._create_products()[0]
+        url = f"{BASE_URL}/{test_product.id}"
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        found_product = Product.find(test_product.id)
+        self.assertIsNone(found_product)
+
+    def test_delete_unknown_product(self):
+        """ Should return not found when deleting an unknown product """
+        url = f"{BASE_URL}/{1000}"
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # Write a test case to List all Products and watch it fail
+    # Write the code to make the List all test case pass
+    def test_list_all_products(self):
+        raise NotImplementedError
+
+
+    # Write a test case to List by name a Product and watch it fail
+    # Write the code to make the List by name test case pass
+    def test_list_products_by_name(self):
+        raise NotImplementedError
+
+    # Write a test case to List by category a Product and watch it fail
+    # Write the code to make the List by category test case pass
+    def test_list_products_by_category(self):
+        raise NotImplementedError
+
+    # Write a test case to List by availability a Product and watch it fail
+    # Write the code to make the List by availability test case pass
+    def test_list_products_by_availability(self):
+        raise NotImplementedError
+
 
     ######################################################################
     # Utility functions
