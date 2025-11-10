@@ -101,6 +101,112 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(new_product.available, product.available)
         self.assertEqual(new_product.category, product.category)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
+    def test_get_product(self):
+        """It should get a product from the database"""
+        product = ProductFactory()
+        app.logger.debug(f"Creating product: {product.__repr__()}")
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        new_product = products[0]
+        self.assertEqual(new_product.name, product.name)
+        self.assertEqual(new_product.description, product.description)
+        self.assertEqual(new_product.price, product.price)
+        self.assertEqual(new_product.available, product.available)
+        self.assertEqual(new_product.category, product.category)
+
+    def test_update_product(self):
+        """It should update a product in the database"""
+        product = ProductFactory()
+        app.logger.debug(f"Creating product: {product.__repr__()}")
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+
+        product.description = "Muh updated description!"
+        product.update()
+
+        products = Product.all()
+        updated_product = products[0]
+        self.assertEqual(updated_product.description, "Muh updated description!")
+
+
+    def test_delete_product(self):
+        """It should remove a product from the database"""
+        product = ProductFactory()
+        app.logger.debug(f"Creating product: {product.__repr__()}")
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        product.delete()
+        products = Product.all()
+        self.assertEqual(len(products), 0)
+
+    def test_list_all_products(self):
+        """It should list all products in the database"""
+        product_1 = ProductFactory()
+        product_1.id = None
+        product_1.create()
+
+        product_2 = ProductFactory()
+        product_2.id = None
+        product_2.create()
+
+        product_2 = ProductFactory()
+        product_2.id = None
+        product_2.create()
+
+        products = Product.all()
+        self.assertEqual(len(products), 3)
+
+    def test_search_for_product_by_name(self):
+        """It should search for a product by name"""
+        product_1 = ProductFactory()
+        product_1.id = None
+        product_1.create()
+
+        product_2 = ProductFactory()
+        product_2.id = None
+        product_2.create()
+
+        found_products = Product.find_by_name(product_2.name)
+        # Should only be one item:     
+        self.assertEqual(found_products[0].id, product_2.id)
+
+    def test_search_for_product_by_category(self):
+        """It should search for a product by category"""
+        product_1 = ProductFactory()
+        product_1.id = None
+        product_1.category = Category.FOOD
+        product_1.create()
+
+        product_2 = ProductFactory()
+        product_2.id = None
+        product_2.category = Category.HOUSEWARES
+        product_2.create()
+
+        found_products = Product.find_by_category(Category.FOOD)
+        # Should only be one item:     
+        self.assertEqual(found_products[0].name, product_1.name)
+
+    def test_search_for_product_by_availability(self):
+        """It should search for a product by availability"""
+        product_1 = ProductFactory()
+        product_1.id = None
+        product_1.available = False
+        product_1.create()
+
+        product_2 = ProductFactory()
+        product_2.id = None
+        product_2.available = True
+        product_2.create()
+
+        found_products = Product.find_by_availability(True)
+        # Should only be one item:
+        self.assertEqual(found_products[0].name, product_2.name)
