@@ -237,8 +237,15 @@ class TestProductRoutes(TestCase):
     # Write a test case to List all Products and watch it fail
     # Write the code to make the List all test case pass
     def test_list_all_products(self):
-        raise NotImplementedError
+        products = self._create_products(10)
 
+        url = f"{BASE_URL}"
+        response = self.client.get(url)
+        selfassertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 10)
 
     # Write a test case to List by name a Product and watch it fail
     # Write the code to make the List by name test case pass
