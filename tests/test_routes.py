@@ -28,6 +28,7 @@ import os
 import logging
 from decimal import Decimal
 from unittest import TestCase
+from urllib.parse import quote_plus
 from service import app
 from service.common import status
 from service.models import db, init_db, Product, Category
@@ -252,7 +253,8 @@ class TestProductRoutes(TestCase):
         search_name = products[0].name
         name_count = sum([p.name == search_name for p in products])
 
-        url = f"{BASE_URL}?name={search_name}"
+        encoded_search_name = quote_plus(search_name)
+        url = f"{BASE_URL}?name={encoded_search_name}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
