@@ -29,6 +29,7 @@ from behave import when, then
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions
+from selenium.common.exceptions import TimeoutException
 
 ID_PREFIX = 'product_'
 
@@ -44,6 +45,27 @@ def step_impl(context):
 def step_impl(context, message):
     """ Check the document title for a message """
     assert(message in context.driver.title)
+
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    flash_message_id = 'flash_message'    
+
+    try:
+        WebDriverWait(context.driver, context.wait_seconds).until(
+            expected_conditions.text_to_be_present_in_element(
+                (By.ID, flash_message_id),
+                message
+            )
+        )
+    except TimeoutException:
+        element = context.driver.find_element(By.ID, flash_message_id)
+        element_text = element.text.strip()
+        print(f"Message wait timed out. Message: {element_text}")
+        assert(message in element_text)
+    
+    element = context.driver.find_element(By.ID, flash_message_id)
+    element_text = element.text.strip()
+    assert(message in element_text)
 
 @then('I should not see "{text_string}"')
 def step_impl(context, text_string):
@@ -75,6 +97,44 @@ def step_impl(context, element_name):
     element = context.driver.find_element(By.ID, element_id)
     assert(element.get_attribute('value') == u'')
 
+@then('the "{element_name}" field should not be empty')
+def step_impl(context, element_name):
+    element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
+    element = context.driver.find_element(By.ID, element_id)
+    assert(element.get_attribute('value') != u'')
+
+@when('I get the "{product_property}" from the "{product_name}" product')
+def step_impl(context, product_property, product_name):
+    product_property_adjusted = product_property.lower()
+    assert(product_name in context.products)
+    product = context.products[product_name]
+    assert(product_property_adjusted in product)
+    context.product_copy = {}
+    context.product_copy[product_property_adjusted] = product[product_property_adjusted]
+
+@when('I set the product "{product_property}" into the "{element_name}" field')
+def step_impl(context, product_property, element_name):
+    product_property_adjusted = product_property.lower()
+    assert(product_property_adjusted in context.product_copy)
+    value = context.product_copy[product_property_adjusted]
+    element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
+    element = context.driver.find_element(By.ID, element_id)
+    element.clear()
+    element.send_keys(value)
+
+@then(u'I should see "{product_name}" in results')
+def step_impl(context, product_name):
+    results_element = context.driver.find_element(By.ID, 'search_results')
+    results_text = results_element.text
+    assert (product_name in results_text)    
+
+@then(u'I should not see "{product_name}" in results')
+def step_impl(context, product_name):
+    results_element = context.driver.find_element(By.ID, 'search_results')
+    results_text = results_element.text
+    assert (product_name not in results_text)
+    
+
 ##################################################################
 # These two function simulate copy and paste
 ##################################################################
@@ -104,7 +164,11 @@ def step_impl(context, element_name):
 # to get the element id of any button
 ##################################################################
 
-## UPDATE CODE HERE ##
+@when('I press the "{button_name}" button')
+def step_impl(context, button_name):
+    element_id = button_name.lower().replace(' ', '_') + '-btn'
+    element = context.driver.find_element(By.ID, element_id)
+    element.click()
 
 ##################################################################
 # This code works because of the following naming convention:

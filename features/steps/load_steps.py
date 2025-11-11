@@ -43,10 +43,19 @@ def step_impl(context):
         context.resp = requests.delete(f"{rest_endpoint}/{product['id']}")
         assert(context.resp.status_code == HTTP_204_NO_CONTENT)
 
-    #
     # load the database with new products
-    #
+    context.products = {}
     for row in context.table:
-        #
-        # ADD YOUR CODE HERE TO CREATE PRODUCTS VIA THE REST API
-        #
+        product_name = row['name']
+        product_dict = {
+            "name":product_name,
+            "description":row['description'],
+            "price":row['price'],
+            "available":row['available'] in ['True', 'true', '1'],
+            "category":row['category']
+        }
+        
+        rest_endpoint = f"{context.base_url}/products"
+        context.resp = requests.post(rest_endpoint, json=product_dict)
+        context.products[product_name] = context.resp.json()
+        assert(context.resp.status_code == HTTP_201_CREATED)

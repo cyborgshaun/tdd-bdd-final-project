@@ -38,3 +38,100 @@ Scenario: Create a Product
     And I should see "True" in the "Available" dropdown
     And I should see "Tools" in the "Category" dropdown
     And I should see "34.95" in the "Price" field
+
+Scenario: Read a Product
+    When I visit the "Home Page"
+    And I press the "Clear" button
+    Then the "Id" field should be empty    
+    When I set the "Name" to "Hat"
+    And I press the "Search" button
+    Then I should see the message "Success"    
+    And the "Id" field should not be empty
+    When I copy the "Id" field
+    And I press the "Clear" button
+    Then the "Id" field should be empty
+    When I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "Hat" in the "Name" field
+    And I should see "A red fedora" in the "Description" field
+    And I should see "True" in the "Available" dropdown
+    And I should see "Cloths" in the "Category" dropdown
+    And I should see "59.95" in the "Price" field
+
+Scenario: Update a Product
+    When I visit the "Home Page"
+    And I get the "Id" from the "Shoes" product
+    And I set the product "Id" into the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    When I set the "Name" to "Fancy Shoes"
+    And I set the "Description" to "Purple shoes"
+    And I set the "Price" to "169.99"
+    And I press the "Update" button
+    Then I should see the message "Success"    
+
+Scenario: Delete a Product
+    When I visit the "Home Page"
+    And I set the "Name" to "Bucket"
+    And I set the "Description" to "Sand bucket"
+    And I select "True" in the "Available" dropdown
+    And I select "Tools" in the "Category" dropdown
+    And I set the "Price" to "24.95"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Id" field
+    And I press the "Clear" button
+    Then the "Id" field should be empty
+    And the "Name" field should be empty
+    And the "Description" field should be empty
+    When I paste the "Id" field
+    And I copy the "Id" field
+    And I press the "Delete" button
+    Then I should see the message "Product has been Deleted!"
+    When I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see the message "Not Found"
+
+Scenario: List all products
+    When I visit the "Home Page"
+    And I press the "Clear" button
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "Hat" in results
+    And I should see "Shoes" in results
+    And I should see "Big Mac" in results
+    And I should see "Sheets" in results
+
+Scenario: Search for Products by Category
+    When I visit the "Home Page"
+    And I press the "Clear" button
+    And I select "Food" in the "Category" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "Big Mac" in results
+    And I should not see "Hat" in results
+    And I should not see "Shoes" in results
+    And I should not see "Sheets" in results
+
+Scenario: Search for Products by Availability
+    When I visit the "Home Page"
+    And I press the "Clear" button
+    And I select "True" in the "Available" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "Hat" in results
+    And I should see "Big Mac" in results
+    And I should see "Sheets" in results
+    And I should not see "Shoes" in results
+
+Scenario: Search for Products by Name
+    When I visit the "Home Page"
+    And I press the "Clear" button
+    And I set the "Name" to "Big Mac"
+    And I press the "Search" button
+    Then I should see the message "Success"    
+    And I should see "Big Mac" in results
+    And I should not see "Hat" in results
+    And I should not see "Sheets" in results
+    And I should not see "Shoes" in results
