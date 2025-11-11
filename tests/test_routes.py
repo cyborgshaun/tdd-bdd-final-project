@@ -160,6 +160,9 @@ class TestProductRoutes(TestCase):
         response = self.client.post(BASE_URL, data={}, content_type="plain/text")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+    # ----------------------------------------------------------
+    # TEST GET
+    # ----------------------------------------------------------
     def test_get_product(self):
         """ Should get a product """
         test_product = self._create_products()[0]
@@ -175,8 +178,9 @@ class TestProductRoutes(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # Write a test case to Update a Product and watch it fail
-    # Write the code to make the Update test case pass
+    # ----------------------------------------------------------
+    # TEST UPDATE
+    # ----------------------------------------------------------
     def test_update_product(self):
         """ Should update a product """
         test_product = self._create_products()[0]
@@ -217,6 +221,9 @@ class TestProductRoutes(TestCase):
         response = self.client.put(url, json=payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    # ----------------------------------------------------------
+    # TEST DELETE
+    # ----------------------------------------------------------
     def test_delete_product(self):
         """ Should delete a product """
         test_product = self._create_products()[0]
@@ -233,6 +240,9 @@ class TestProductRoutes(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    # ----------------------------------------------------------
+    # TEST LIST
+    # ----------------------------------------------------------
     def test_list_all_products(self):
         """ Should get all products """
         self._create_products(10)
@@ -245,8 +255,6 @@ class TestProductRoutes(TestCase):
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), 10)
 
-    # Write a test case to List by name a Product and watch it fail
-    # Write the code to make the List by name test case pass
     def test_list_products_by_name(self):
         """ Should search by product name """
         products = self._create_products(10)
