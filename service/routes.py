@@ -28,6 +28,8 @@ from . import app
 ######################################################################
 # H E A L T H   C H E C K
 ######################################################################
+
+
 @app.route("/health")
 def healthcheck():
     """Let them know our heart is still beating"""
@@ -37,6 +39,8 @@ def healthcheck():
 ######################################################################
 # H O M E   P A G E
 ######################################################################
+
+
 @app.route("/")
 def index():
     """Base URL for our service"""
@@ -46,6 +50,8 @@ def index():
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
+
+
 def check_content_type(content_type):
     """Checks that the media type is correct"""
     if "Content-Type" not in request.headers:
@@ -68,6 +74,8 @@ def check_content_type(content_type):
 ######################################################################
 # C R E A T E   A   N E W   P R O D U C T
 ######################################################################
+
+
 @app.route("/products", methods=["POST"])
 def create_products():
     """
@@ -85,15 +93,14 @@ def create_products():
     app.logger.info("Product with new id [%s] saved!", product.id)
 
     message = product.serialize()
-
-    location_url = url_for("get_product", id=product.id, _external=True)
-    
+    location_url = url_for("get_product", product_id=product.id, _external=True)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
 # L I S T   A L L   P R O D U C T S
 ######################################################################
+
 
 @app.route("/products", methods=['GET'])
 def get_products():
@@ -110,13 +117,13 @@ def get_products():
     if name:
         # Filter by Name:
         products = [p for p in products if p.name == name]
-    
+
     if category_str:
         try:
             # Filter by Category:
             category = getattr(Category, category_str.upper())
             products = [p for p in products if p.category == category]
-        except AttributeError as error:
+        except AttributeError:
             abort(
                 status.HTTP_400_BAD_REQUEST,
                 f"Invalid category: {category_str}"
@@ -143,21 +150,22 @@ def get_products():
 # R E A D   A   P R O D U C T
 ######################################################################
 
-@app.route("/products/<int:id>", methods=['GET'])
-def get_product(id):
+
+@app.route("/products/<int:product_id>", methods=['GET'])
+def get_product(product_id):
     """
     Gets a Product by ID
     This endpoint will get a Product based on the ID provided in the URL
     """
     app.logger.info("Request to Get a Product...")
 
-    found_product = Product.find(id)
+    found_product = Product.find(product_id)
     if not found_product:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"Product not found for id: {id}"
+            f"Product not found for id: {product_id}"
         )
-    
+
     message = found_product.serialize()
     return jsonify(message), status.HTTP_200_OK
 
@@ -165,19 +173,20 @@ def get_product(id):
 # U P D A T E   A   P R O D U C T
 ######################################################################
 
-@app.route("/products/<int:id>", methods=['PUT'])
-def update_product(id):
+
+@app.route("/products/<int:product_id>", methods=['PUT'])
+def update_product(product_id):
     """
     Updates a product with specified id
     This endpoint will update the specified product with newly provided values
     """
     app.logger.info("Request to Update a Product...")
 
-    found_product = Product.find(id)
+    found_product = Product.find(product_id)
     if not found_product:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"Product not found for id: {id}"
+            f"Product not found for id: {product_id}"
         )
 
     check_content_type("application/json")
@@ -212,19 +221,20 @@ def update_product(id):
 # D E L E T E   A   P R O D U C T
 ######################################################################
 
-@app.route("/products/<int:id>", methods=['DELETE'])
-def delete_product(id):
+
+@app.route("/products/<int:product_id>", methods=['DELETE'])
+def delete_product(product_id):
     """
     Deletes a product with specified id
     This endpoint will delete the specified product
     """
     app.logger.info("Request to Update a Product...")
 
-    found_product = Product.find(id)
+    found_product = Product.find(product_id)
     if not found_product:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"Product not found for id: {id}"
+            f"Product not found for id: {product_id}"
         )
 
     found_product.delete()

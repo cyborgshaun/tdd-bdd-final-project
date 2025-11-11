@@ -215,7 +215,7 @@ class TestProductRoutes(TestCase):
         del payload["name"]
         url = f"{BASE_URL}/{test_product.id}"
         response = self.client.put(url, json=payload)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_product(self):
         """ Should delete a product """
@@ -235,7 +235,7 @@ class TestProductRoutes(TestCase):
 
     def test_list_all_products(self):
         """ Should get all products """
-        products = self._create_products(10)
+        self._create_products(10)
 
         url = f"{BASE_URL}"
         response = self.client.get(url)
@@ -251,7 +251,7 @@ class TestProductRoutes(TestCase):
         """ Should search by product name """
         products = self._create_products(10)
         search_name = products[0].name
-        name_count = sum([p.name == search_name for p in products])
+        name_count = sum(p.name == search_name for p in products)
 
         encoded_search_name = quote_plus(search_name)
         url = f"{BASE_URL}?name={encoded_search_name}"
@@ -266,7 +266,7 @@ class TestProductRoutes(TestCase):
         """ Should search by product category """
         products = self._create_products(10)
         search_category = products[0].category.name
-        category_count = sum([p.category.name == search_category for p in products])
+        category_count = sum(p.category.name == search_category for p in products)
 
         url = f"{BASE_URL}?category={search_category}"
         response = self.client.get(url)
@@ -285,7 +285,7 @@ class TestProductRoutes(TestCase):
     def test_list_products_by_availability_true(self):
         """ Should search by product availability: True """
         products = self._create_products(10)
-        available_count = sum([p.available == True for p in products])
+        available_count = sum(p.available is True for p in products)
 
         url = f"{BASE_URL}?available={True}"
         response = self.client.get(url)
@@ -298,7 +298,7 @@ class TestProductRoutes(TestCase):
     def test_list_products_by_availability_false(self):
         """ Should search by product availability: False """
         products = self._create_products(10)
-        available_count = sum([p.available == False for p in products])
+        available_count = sum(p.available is False for p in products)
 
         url = f"{BASE_URL}?available={False}"
         response = self.client.get(url)
@@ -310,8 +310,7 @@ class TestProductRoutes(TestCase):
 
     def test_list_products_by_availability_invalid(self):
         """ Should return bad request with invalid available param """
-        products = self._create_products(10)
-
+        self._create_products(10)
         url = f"{BASE_URL}?available={'booger'}"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

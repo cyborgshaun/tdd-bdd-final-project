@@ -104,7 +104,7 @@ class TestProductModel(unittest.TestCase):
     def test_get_product(self):
         """It should get a product from the database"""
         product = ProductFactory()
-        app.logger.debug(f"Creating product: {product.__repr__()}")
+        app.logger.debug(f"Creating product: {repr(product)}")
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
@@ -120,10 +120,10 @@ class TestProductModel(unittest.TestCase):
     def test_update_product(self):
         """It should update a product in the database"""
         product = ProductFactory()
-        app.logger.debug(f"Creating product: {product.__repr__()}")
+        app.logger.debug(f"Creating product: {repr(product)}")
         product.id = None
         product.create()
-        app.logger.debug(f"Created product: {product.__repr__()}")
+        app.logger.debug(f"Created product: {repr(product)}")
         self.assertIsNotNone(product.id)
         products = Product.all()
         self.assertEqual(len(products), 1)
@@ -138,11 +138,10 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(updated_product.id, product.id)
         self.assertEqual(updated_product.description, new_desc)
 
-
     def test_delete_product(self):
         """It should remove a product from the database"""
         product = ProductFactory()
-        app.logger.debug(f"Creating product: {product.__repr__()}")
+        app.logger.debug(f"Creating product: {repr(product)}")
         product.id = None
         product.create()
         products = Product.all()
@@ -156,43 +155,42 @@ class TestProductModel(unittest.TestCase):
         products = Product.all()
         self.assertEqual(len(products), 0)
 
-        for i in range(5):
-            p = ProductFactory()
-            p.id = None
-            p.create()        
+        for _ in range(5):
+            product = ProductFactory()
+            product.id = None
+            product.create()
 
         products = Product.all()
         self.assertEqual(len(products), 5)
 
     def test_search_for_product_by_name(self):
         """It should search for a product by name"""
-        for i in range(5):
-            p = ProductFactory()
-            p.id = None
-            p.create()
+        for _ in range(5):
+            product = ProductFactory()
+            product.id = None
+            product.create()
 
         products = Product.all()
         self.assertEqual(len(products), 5)
         want_name = products[0].name
-        exist_count = sum([p.name == want_name for p in products])
+        exist_count = sum(p.name == want_name for p in products)
         found_products = Product.find_by_name(want_name)
         self.assertEqual(len(found_products), exist_count)
         is_all_matched = all(p.name == want_name for p in found_products)
         self.assertTrue(is_all_matched)
 
-
     def test_search_for_product_by_category(self):
         """It should search for a product by category"""
-        for i in range(10):
-            p = ProductFactory()
-            p.id = None
-            p.create()
+        for _ in range(10):
+            product = ProductFactory()
+            product.id = None
+            product.create()
 
         products = Product.all()
         self.assertEqual(len(products), 10)
         category = products[0].category
 
-        category_count = sum([p.category == category for p in products])
+        category_count = sum(p.category == category for p in products)
         cat_test_products = Product.find_by_category(category)
         self.assertEqual(len(cat_test_products), category_count)
         is_all_matched = all(p.category == category for p in cat_test_products)
@@ -200,16 +198,16 @@ class TestProductModel(unittest.TestCase):
 
     def test_search_for_product_by_availability(self):
         """It should search for a product by availability"""
-        for i in range(10):
-            p = ProductFactory()
-            p.id = None
-            p.create()
+        for _ in range(10):
+            product = ProductFactory()
+            product.id = None
+            product.create()
 
         products = Product.all()
         self.assertEqual(len(products), 10)
         availability = products[0].available
 
-        available_count = sum([p.available == availability for p in products])        
+        available_count = sum(p.available == availability for p in products)
         avail_test_products = Product.find_by_availability(availability)
         self.assertEqual(len(avail_test_products), available_count)
         is_all_matched = all(p.available == availability for p in avail_test_products)
@@ -217,16 +215,16 @@ class TestProductModel(unittest.TestCase):
 
     def test_search_for_product_by_price(self):
         """It should search for a product by price"""
-        for i in range(10):
-            p = ProductFactory()
-            p.id = None
-            p.create()
+        for _ in range(10):
+            product = ProductFactory()
+            product.id = None
+            product.create()
 
         products = Product.all()
         self.assertEqual(len(products), 10)
         price = products[0].price
 
-        price_count = sum([p.price == price for p in products])
+        price_count = sum(p.price == price for p in products)
         price_test_products = Product.find_by_price(price)
         self.assertEqual(len(price_test_products), price_count)
         is_all_matched = all(p.price == price for p in price_test_products)
