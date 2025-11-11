@@ -46,6 +46,9 @@ def step_impl(context, message):
     """ Check the document title for a message """
     assert(message in context.driver.title)
 
+##################################################################
+# Verify a specific message is present
+##################################################################
 @then('I should see the message "{message}"')
 def step_impl(context, message):
     flash_message_id = 'flash_message'    
@@ -103,6 +106,9 @@ def step_impl(context, element_name):
     element = context.driver.find_element(By.ID, element_id)
     assert(element.get_attribute('value') != u'')
 
+##################################################################
+# These two functions allow copying a product property into a field
+##################################################################
 @when('I get the "{product_property}" from the "{product_name}" product')
 def step_impl(context, product_property, product_name):
     product_property_adjusted = product_property.lower()
@@ -122,12 +128,18 @@ def step_impl(context, product_property, element_name):
     element.clear()
     element.send_keys(value)
 
+##################################################################
+# Verify a product name is present in results
+##################################################################
 @then(u'I should see "{product_name}" in results')
 def step_impl(context, product_name):
     results_element = context.driver.find_element(By.ID, 'search_results')
     results_text = results_element.text
     assert (product_name in results_text)    
 
+##################################################################
+# Verify a product name is NOT present in results
+##################################################################
 @then(u'I should not see "{product_name}" in results')
 def step_impl(context, product_name):
     results_element = context.driver.find_element(By.ID, 'search_results')
